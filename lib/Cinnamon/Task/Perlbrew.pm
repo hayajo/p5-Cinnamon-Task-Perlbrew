@@ -223,10 +223,7 @@ Cinnamon::Task::Perlbrew is
 
 =head2 prelbrew_run ( I<$sub: CODE> I<$perlbrew_root: String> I<$perlbrew: String> ): Any
 
-  # Executed on localhost
-  perlbrew_run {
-    run 'perl --version';
-  } $perlbrew_root, $perlbrew;
+This is supported only under remote.
 
   # Executed on remote host
   remote {
