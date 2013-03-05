@@ -143,8 +143,10 @@ EOS
         my $perlbrew_rc     = perlbrew_rc $perlbrew_root;
 
         remote {
-            my $_modules = join( ' ', @$modules );
-            # perlbrew_run $perlbrew_root, $perlbrew, "cpanm $opts $_modules";
+            perlbrew_run {
+                my $_modules = join( ' ', @$modules );
+                run "cpanm $opts $_modules";
+            } $perlbrew_root, $perlbrew;
         } $host;
     },
 };
