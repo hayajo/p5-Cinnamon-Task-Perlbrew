@@ -35,5 +35,4 @@ task perl => {
 
 task hello_world => sub {
     run 'echo', 'hello world';
-    # run 'echo hello world';
 };
