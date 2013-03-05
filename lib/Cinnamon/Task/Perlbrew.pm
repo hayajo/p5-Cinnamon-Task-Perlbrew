@@ -203,8 +203,9 @@ This document describes Cinnamon::Task::Perlbrew version 0.01
 
 =head1 DESCRIPTION
 
-Cinnamon::Task::Perlbrew is
+Cinnamon::Task::Perlbrew is perlbrew tasks and dsl for L<Cinnamon>.
 
+This is B<alpha> version.
 
 =head1 TASKS
 
