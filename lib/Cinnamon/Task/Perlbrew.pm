@@ -208,24 +208,32 @@ Cinnamon::Task::Perlbrew is
 
 =head1 TASKS
 
-=head2 C<perlbrew:setup>
+=over 4
 
-=head2 C<perlbrew:perl:install>
+=item C<perlbrew:setup>
 
-=head2 C<perlbrew:perl:uninstall>
+=item C<perlbrew:perl:install>
 
-=head2 C<perlbrew:lib:create>
+=item C<perlbrew:perl:uninstall>
 
-=head2 C<perlbrew:lib:delete>
+=item C<perlbrew:lib:create>
 
-=head2 C<perlbrew:cpanm>
+=item C<perlbrew:lib:delete>
+
+=item C<perlbrew:cpanm>
+
+=back
 
 
 =head1 DSL
 
-=head2 prelbrew_run ( I<$sub: CODE> I<$perlbrew_root: String> I<$perlbrew: String> ): Any
+=over 4
+
+=item prelbrew_run ( I<$sub: CODE> I<$perlbrew_root: String> I<$perlbrew: String> ): Any
 
 This is supported only under remote.
+
+sudo is not supported.
 
   # Executed on remote host
   remote {
@@ -233,6 +241,8 @@ This is supported only under remote.
         run 'perl --version';
     } $perlbrew_root, $perlbrew;
   } $host;
+
+=back
 
 
 =head1 AUTHOR
