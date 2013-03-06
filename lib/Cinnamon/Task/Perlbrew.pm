@@ -2,7 +2,7 @@ package Cinnamon::Task::Perlbrew;
 
 use warnings;
 use strict;
-use Carp;
+use Carp ();
 
 our $VERSION = '0.01';
 
@@ -32,28 +32,24 @@ sub perlbrew_run (&$$) {
     no warnings 'redefine';
 
     my $caller   = caller;
-    my $dsl      = "${caller}::run";
-    my $orig_dsl = *{$dsl}{CODE};
+    my $run      = "${caller}::run";
+    my $orig_run = *{$run}{CODE} or Carp::croak "$run is not implemented";
 
-    local *{$dsl} = sub (@) {
+    local *{$run} = sub (@) {
         my @cmd = @_;
         my $pre_cmd = <<"EOS";
-export PERLBREW_ROOT=$perlbrew_root
-export PERLBREW_HOME=$perlbrew_root
-source $perlbrew_rc
-perlbrew use $perlbrew
+export PERLBREW_ROOT=$perlbrew_root; \\
+export PERLBREW_HOME=$perlbrew_root; \\
+source $perlbrew_rc; \\
+perlbrew use $perlbrew; \\
 EOS
-        my $opts;
-        $opts = shift @cmd if ref $cmd[0] eq 'HASH';
 
-        if ($opts) {
-            unshift @cmd, $opts, $pre_cmd;
-        }
-        else {
-            unshift @cmd, $pre_cmd;
-        }
+        my $opt = ( ref $cmd[0] eq 'HASH' ) ? shift @cmd : undef;
 
-        $orig_dsl->(@cmd);
+        my @args = ( $pre_cmd . join( ' ', @cmd ) );
+        unshift @args, $opt if ($opt);
+
+        $orig_run->(@args);
     };
 
     $code->();
@@ -66,18 +62,20 @@ task perlbrew => {
         my $perlbrew_bin    = perlbrew_bin $perlbrew_root;
 
         remote {
-            run <<"EOS";
+            my $cmd = <<"EOS";
 export PERLBREW_ROOT=$perlbrew_root
-if [ ! -e $perlbrew_bin ]; then
-    curl -kL http://install.perlbrew.pl > perlbrew-install
-    /bin/sh perlbrew-install
-    $perlbrew_bin -f install-cpanm
-else
+if [ ! -e $perlbrew_bin ]; then \\
+  curl -kL http://install.perlbrew.pl > perlbrew-install; \\
+  /bin/sh perlbrew-install; \\
+  $perlbrew_bin -f install-cpanm; \\
+else \\
+  $perlbrew_bin self-upgrade; \\
+  $perlbrew_bin -f install-patchperl; \\
+  $perlbrew_bin -f install-cpanm; \\
 fi
-    $perlbrew_bin self-upgrade
-    $perlbrew_bin -f install-patchperl
-    $perlbrew_bin -f install-cpanm
 EOS
+            chomp $cmd;
+            run $cmd;
         } $host;
     },
     perl => {
@@ -89,7 +87,7 @@ EOS
             my $perlbrew_bin  = perlbrew_bin $perlbrew_root;
 
             remote {
-                run "export PERLBREW_ROOT=$perlbrew_root && $perlbrew_bin install --verbose $version $install_opts";
+                run "export PERLBREW_ROOT=$perlbrew_root; $perlbrew_bin install --verbose $version $install_opts";
             } $host;
         },
         uninstall => sub {
@@ -99,7 +97,7 @@ EOS
             my $perlbrew_bin  = perlbrew_bin $perlbrew_root;
 
             remote {
-                run "export PERLBREW_ROOT=$perlbrew_root && $perlbrew_bin uninstall $version";
+                run "export PERLBREW_ROOT=$perlbrew_root; $perlbrew_bin uninstall $version";
             } $host;
         },
     },
@@ -111,11 +109,13 @@ EOS
             my $perlbrew_bin  = perlbrew_bin $perlbrew_root;
 
             remote {
-                run <<"EOS"
-export PERLBREW_ROOT=$perlbrew_root
-export PERLBREW_HOME=$perlbrew_root
+                my $cmd = <<"EOS";
+export PERLBREW_ROOT=$perlbrew_root; \\
+export PERLBREW_HOME=$perlbrew_root; \\
 $perlbrew_bin lib create $perlbrew
 EOS
+                chomp $cmd;
+                run $cmd;
             } $host;
         },
         delete => sub {
@@ -125,11 +125,13 @@ EOS
             my $perlbrew_bin  = perlbrew_bin $perlbrew_root;
 
             remote {
-                run <<"EOS"
-export PERLBREW_ROOT=$perlbrew_root
-export PERLBREW_HOME=$perlbrew_root
-$perlbrew_bin lib delete $perlbrew
+                my $cmd = <<"EOS";
+export PERLBREW_ROOT=$perlbrew_root; \\
+export PERLBREW_HOME=$perlbrew_root; \\
+$perlbrew_bin lib delete $perlbrew;
 EOS
+                chomp $cmd;
+                run $cmd;
             } $host;
         },
     },
@@ -172,15 +174,12 @@ This document describes Cinnamon::Task::Perlbrew version 0.01
   use Cinnamon::DSL;
   use Cinnamon::Task::Perlbrew;
   
-  my $perlbrew_root = '/tmp/cinnamon_perlbrew';
-  
-  # global options
-  set perlbrew_root => $perlbrew_root;
   set user          => getpwuid($>);
+  set perlbrew_root => '/tmp/cinnamon_perlbrew';
   
   role development => [qw/localhost/], {
-      perlbrew_perl_version => 'perl-5.17.9',
-      perlbrew              => 'perl-5.17.9@hoge',
+      perlbrew_perl_version => 'perl-5.16.2',
+      perlbrew              => 'perl-5.16.2@development',
       cpanm_modules         => [qw/JSON::XS Plack/],
       cpanm_options         => '--verbose --notest',
   };
@@ -188,6 +187,8 @@ This document describes Cinnamon::Task::Perlbrew version 0.01
   task perl => {
       version => sub {
           my ( $host, @args ) = @_;
+          my $perlbrew_root   = get('perlbrew_root');
+          my $perlbrew        = get('perlbrew');
           remote {
               perlbrew_run {
                 run 'perl', '--version';
@@ -232,9 +233,9 @@ This is B<alpha> version.
 
 =item prelbrew_run ( I<$sub: CODE> I<$perlbrew_root: String> I<$perlbrew: String> ): Any
 
-This is supported only under remote.
+This is supported only under C<remote>.
 
-sudo is not supported.
+C<sudo> is not supported.
 
   # Executed on remote host
   remote {
