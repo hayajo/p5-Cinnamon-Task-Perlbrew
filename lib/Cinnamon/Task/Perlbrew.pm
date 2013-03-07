@@ -43,12 +43,11 @@ sub perlbrew_run (&$$) {
         my $pre_cmd = <<"EOS";
 export PERLBREW_ROOT=$perlbrew_root; \\
 export PERLBREW_HOME=$perlbrew_root; \\
-source $perlbrew_rc; \\
-perlbrew use $perlbrew; \\
+source $perlbrew_rc && \\
+perlbrew use $perlbrew && \\
 EOS
 
-        my $opt = ( ref $cmd[0] eq 'HASH' ) ? shift @cmd : undef;
-
+        my $opt  = ( ref $cmd[0] eq 'HASH' ) ? shift @cmd : undef;
         my @args = ( $pre_cmd . join( ' ', @cmd ) );
         unshift @args, $opt if ($opt);
 
@@ -131,7 +130,7 @@ EOS
                 my $cmd = <<"EOS";
 export PERLBREW_ROOT=$perlbrew_root; \\
 export PERLBREW_HOME=$perlbrew_root; \\
-$perlbrew_bin lib delete $perlbrew;
+$perlbrew_bin lib delete $perlbrew
 EOS
                 chomp $cmd;
                 run $cmd;
