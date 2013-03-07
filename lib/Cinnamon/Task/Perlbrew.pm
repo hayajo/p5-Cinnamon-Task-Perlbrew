@@ -36,6 +36,9 @@ sub perlbrew_run (&$$) {
     my $orig_run = *{$run}{CODE} or Carp::croak "$run is not implemented";
 
     local *{$run} = sub (@) {
+        Carp::croak "perlbrew_run have to use with remote"
+            unless ( ref $_ eq 'Cinnamon::Remote' );
+
         my @cmd = @_;
         my $pre_cmd = <<"EOS";
 export PERLBREW_ROOT=$perlbrew_root; \\
