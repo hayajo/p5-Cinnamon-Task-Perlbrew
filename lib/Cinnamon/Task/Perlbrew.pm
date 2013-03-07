@@ -61,6 +61,7 @@ task perlbrew => {
     setup => sub {
         my ( $host, @args ) = @_;
         my $perlbrew_root   = shell_quote( get 'perlbrew_root' );
+        my $perlbrew_sudo   = get 'perlbrew_sudo';
         my $perlbrew_bin    = perlbrew_bin $perlbrew_root;
 
         remote {
@@ -77,7 +78,7 @@ else \\
 fi
 EOS
             chomp $cmd;
-            run $cmd;
+            _run( $cmd, $perlbrew_sudo );
         } $host;
     },
     perl => {
@@ -86,20 +87,22 @@ EOS
             my $perlbrew_root = shell_quote( get 'perlbrew_root' );
             my $version       = shell_quote( get 'perlbrew_perl_version' );
             my $install_opts  = get 'perlbrew_perl_install_options';
+            my $perlbrew_sudo = get 'perlbrew_sudo';
             my $perlbrew_bin  = perlbrew_bin $perlbrew_root;
 
             remote {
-                run "export PERLBREW_ROOT=$perlbrew_root; $perlbrew_bin install --verbose $version $install_opts";
+                _run( "export PERLBREW_ROOT=$perlbrew_root; $perlbrew_bin install --verbose $version $install_opts", $perlbrew_sudo );
             } $host;
         },
         uninstall => sub {
             my ( $host, @args ) = @_;
             my $perlbrew_root = shell_quote( get 'perlbrew_root' );
             my $version       = shell_quote( get 'perlbrew_perl_version' );
+            my $perlbrew_sudo = get 'perlbrew_sudo';
             my $perlbrew_bin  = perlbrew_bin $perlbrew_root;
 
             remote {
-                run "export PERLBREW_ROOT=$perlbrew_root; $perlbrew_bin uninstall $version";
+                _run( "export PERLBREW_ROOT=$perlbrew_root; $perlbrew_bin uninstall $version", $perlbrew_sudo );
             } $host;
         },
     },
@@ -108,6 +111,7 @@ EOS
             my ( $host, @args ) = @_;
             my $perlbrew_root = shell_quote( get 'perlbrew_root' );
             my $perlbrew      = shell_quote( get 'perlbrew' );
+            my $perlbrew_sudo = get 'perlbrew_sudo';
             my $perlbrew_bin  = perlbrew_bin $perlbrew_root;
 
             remote {
@@ -117,13 +121,14 @@ export PERLBREW_HOME=$perlbrew_root; \\
 $perlbrew_bin lib create $perlbrew
 EOS
                 chomp $cmd;
-                run $cmd;
+                _run( $cmd, $perlbrew_sudo );
             } $host;
         },
         delete => sub {
             my ( $host, @args ) = @_;
             my $perlbrew_root = shell_quote( get 'perlbrew_root' );
             my $perlbrew      = shell_quote( get 'perlbrew' );
+            my $perlbrew_sudo = get 'perlbrew_sudo';
             my $perlbrew_bin  = perlbrew_bin $perlbrew_root;
 
             remote {
@@ -133,7 +138,7 @@ export PERLBREW_HOME=$perlbrew_root; \\
 $perlbrew_bin lib delete $perlbrew
 EOS
                 chomp $cmd;
-                run $cmd;
+                _run( $cmd, $perlbrew_sudo );
             } $host;
         },
     },
@@ -143,17 +148,23 @@ EOS
         my $perlbrew        = shell_quote( get 'perlbrew' );
         my $modules         = get 'cpanm_modules' || [];
         my $opts            = get 'cpanm_options';
+        my $perlbrew_sudo   = get 'perlbrew_sudo';
         my $perlbrew_bin    = perlbrew_bin $perlbrew_root;
         my $perlbrew_rc     = perlbrew_rc $perlbrew_root;
 
         remote {
             perlbrew_run {
                 my $_modules = join( ' ', @$modules );
-                run "cpanm $opts $_modules";
+                _run( "cpanm $opts $_modules", $perlbrew_sudo );
             } $perlbrew_root, $perlbrew;
         } $host;
     },
 };
+
+sub _run {
+    my ( $cmd, $sudo ) = @_;
+    ($sudo) ? sudo $cmd : run $cmd;
+}
 
 1; # Magic true value required at end of module
 __END__
