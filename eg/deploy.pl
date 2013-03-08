@@ -13,8 +13,8 @@ set user          => getpwuid($>);
 role development => [qw/localhost/], {
     perlbrew_perl_version => 'perl-5.17.9',
     perlbrew              => 'perl-5.17.9@hoge',
-    cpanm_modules         => [qw/JSON::XS Carton/],
-    cpanm_options         => '--verbose --notest',
+    cpanm_modules         => [qw/Crypt::SSLeay/],
+    cpanm_options         => [qw/--verbose --no-interactive/],
 };
 
 task perl => {
