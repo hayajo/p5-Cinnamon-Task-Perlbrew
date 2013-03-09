@@ -10,7 +10,7 @@ my $builder = Module::Build->new(
     build_requires       => {
         'Test::More'                  => '0.98',
         'Test::Requires'              => '0.06',
-        'Test::Exception::LessClever' => '0.006';
+        'Test::Exception::LessClever' => '0.006',
     },
     configure_requires => { 'Module::Build' => '0.38' },
     requires => {
