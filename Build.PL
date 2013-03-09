@@ -8,13 +8,15 @@ my $builder = Module::Build->new(
     dist_author          => 'hayajo <hayajo@cpan.org>',
     dist_version_from    => 'lib/Cinnamon/Task/Perlbrew.pm',
     build_requires       => {
-        'Test::More'     => '0.98',
-        'Test::Requires' => '0.06',
+        'Test::More'                  => '0.98',
+        'Test::Requires'              => '0.06',
+        'Test::Exception::LessClever' => '0.006';
     },
     configure_requires => { 'Module::Build' => '0.38' },
-    requires           => {
-        'perl'            => '5.008001',
-        # 'REQUIRED::MODULE' => '0',
+    requires => {
+        'perl'               => '5.008001',
+        "Cinnamon"           => '0.07',
+        "String::ShellQuote" => '1.04',
     },
     script_files   => [],
     create_readme  => 1,
