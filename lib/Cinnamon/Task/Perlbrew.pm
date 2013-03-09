@@ -66,11 +66,11 @@ EOS
 task perlbrew => {
     setup => sub {
         my ( $host, @args ) = @_;
-        my $perlbrew_root   = get 'perlbrew_root';
-        my $perlbrew_sudo   = get 'perlbrew_sudo' || 0;
-        my $perlbrew_bin    = _perlbrew_bin $perlbrew_root;
+        my $perlbrew_root   = get('perlbrew_root') or Carp::croak "perlbrew_root is required";
+        my $perlbrew_sudo   = get('perlbrew_sudo') || 0;
 
-        $perlbrew_root = shell_quote($perlbrew_root);
+        my $perlbrew_bin = _perlbrew_bin $perlbrew_root;
+        $perlbrew_root   = shell_quote($perlbrew_root);
 
         remote {
             _run( <<"EOS", $perlbrew_sudo );
@@ -90,13 +90,14 @@ EOS
     perl => {
         install => sub {
             my ( $host, @args ) = @_;
-            my $perlbrew_root = get 'perlbrew_root';
-            my $version       = shell_quote( get 'perlbrew_perl_version' );
-            my $install_opts  = get 'perlbrew_perl_install_options' || [];
-            my $perlbrew_sudo = get 'perlbrew_sudo' || 0;
-            my $perlbrew_bin  = shell_quote( _perlbrew_bin $perlbrew_root );
+            my $perlbrew_root = get('perlbrew_root') or Carp::croak "perlbrew_root is required";
+            my $version       = get('perlbrew_perl_version') or Carp::croak "perlbrew_perl_version is required";
+            my $install_opts  = get('perlbrew_perl_install_options') || [];
+            my $perlbrew_sudo = get('perlbrew_sudo') || 0;
 
-            $perlbrew_root = shell_quote($perlbrew_root);
+            my $perlbrew_bin = shell_quote( _perlbrew_bin $perlbrew_root );
+            $perlbrew_root   = shell_quote($perlbrew_root);
+            $version         = shell_quote($version);
 
             my $cmd_str = <<"EOS";
 export PERLBREW_ROOT=$perlbrew_root; \\
@@ -114,12 +115,13 @@ EOS
         },
         uninstall => sub {
             my ( $host, @args ) = @_;
-            my $perlbrew_root = get 'perlbrew_root';
-            my $version       = shell_quote( get 'perlbrew_perl_version' );
-            my $perlbrew_sudo = get 'perlbrew_sudo' || 0;
-            my $perlbrew_bin  = shell_quote( _perlbrew_bin $perlbrew_root );
+            my $perlbrew_root = get('perlbrew_root') or Carp::croak "perlbrew_root is required";
+            my $version       = get('perlbrew_perl_version') or Carp::croak "perlbrew_perl_version is required";
+            my $perlbrew_sudo = get('perlbrew_sudo') || 0;
 
-            $perlbrew_root = shell_quote($perlbrew_root);
+            my $perlbrew_bin = shell_quote( _perlbrew_bin $perlbrew_root );
+            $perlbrew_root   = shell_quote($perlbrew_root);
+            $version         = shell_quote($version);
 
             remote {
                 _run( <<"EOS", $perlbrew_sudo );
@@ -132,10 +134,13 @@ EOS
     lib => {
         create => sub {
             my ( $host, @args ) = @_;
-            my $perlbrew_root = get 'perlbrew_root';
-            my $perlbrew      = shell_quote( get 'perlbrew' );
-            my $perlbrew_sudo = get 'perlbrew_sudo' || 0;
-            my $perlbrew_bin  = shell_quote( _perlbrew_bin $perlbrew_root );
+            my $perlbrew_root = get('perlbrew_root') or Carp::croak "perlbrew_root is required";
+            my $perlbrew      = get('perlbrew') or Carp::croak "perlbrew is required";
+            my $perlbrew_sudo = get('perlbrew_sudo') || 0;
+
+            my $perlbrew_bin = shell_quote( _perlbrew_bin $perlbrew_root );
+            $perlbrew_root   = shell_quote($perlbrew_root);
+            $perlbrew        = shell_quote($perlbrew);
 
             remote {
                 _run( <<"EOS", $perlbrew_sudo );
@@ -147,10 +152,13 @@ EOS
         },
         delete => sub {
             my ( $host, @args ) = @_;
-            my $perlbrew_root = get 'perlbrew_root';
-            my $perlbrew      = shell_quote( get 'perlbrew' );
-            my $perlbrew_sudo = get 'perlbrew_sudo' || 0;
-            my $perlbrew_bin  = shell_quote( _perlbrew_bin $perlbrew_root );
+            my $perlbrew_root = get('perlbrew_root') or Carp::croak "perlbrew_root is required";
+            my $perlbrew      = get('perlbrew') or Carp::croak "perlbrew is required";
+            my $perlbrew_sudo = get('perlbrew_sudo') || 0;
+
+            my $perlbrew_bin = shell_quote( _perlbrew_bin $perlbrew_root );
+            $perlbrew_root   = shell_quote($perlbrew_root);
+            $perlbrew        = shell_quote($perlbrew);
 
             remote {
                 _run( <<"EOS", $perlbrew_sudo );
@@ -163,13 +171,16 @@ EOS
     },
     cpanm => sub {
         my ( $host, @args ) = @_;
-        my $perlbrew_root   = get 'perlbrew_root';
-        my $perlbrew        = shell_quote( get 'perlbrew' );
-        my $modules         = get 'cpanm_modules' || [];
-        my $cpanm_opts      = get 'cpanm_options' || [];
-        my $perlbrew_sudo   = get 'perlbrew_sudo' || 0;
-        my $perlbrew_bin    = shell_quote( _perlbrew_bin $perlbrew_root );
-        my $perlbrew_rc     = shell_quote( _perlbrew_rc $perlbrew_root );
+        my $perlbrew_root   = get('perlbrew_root') or Carp::croak "perlbrew_root is required";
+        my $perlbrew        = get('perlbrew') or Carp::croak "perlbrew is required";
+        my $modules         = get('cpanm_modules') || [];
+        my $cpanm_opts      = get('cpanm_options') || [];
+        my $perlbrew_sudo   = get('perlbrew_sudo') || 0;
+
+        my $perlbrew_bin = shell_quote( _perlbrew_bin $perlbrew_root );
+        my $perlbrew_rc  = shell_quote( _perlbrew_rc $perlbrew_root );
+        $perlbrew_root   = shell_quote($perlbrew_root);
+        $perlbrew        = shell_quote($perlbrew);
 
         my $cmd_str = "cpanm";
         for ( @$cpanm_opts, @$modules ) {
