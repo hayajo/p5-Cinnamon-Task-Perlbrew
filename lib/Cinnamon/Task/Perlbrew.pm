@@ -262,15 +262,115 @@ This is B<alpha> version.
 
 =item C<perlbrew:setup>
 
+=over 2
+
+=item I<perlbrew_root :Srting:Required>
+
+PERLBREW_ROOT path.
+
+=back
+
 =item C<perlbrew:perl:install>
+
+=over 2
+
+=item I<perlbrew_root :String:Required>
+
+PERLBREW_ROOT path.
+
+=item I<perlbrew_perl_version :String:Required>
+
+version of perl.
+
+e.g.
+
+  perl-5.16.2
+
+=item I<perlbrew_perl_install_options :Arrayref>
+
+options for "perlbrew install".
+
+=back
 
 =item C<perlbrew:perl:uninstall>
 
+=over 2
+
+=item I<perlbrew_root :String:Required>
+
+PERLBREW_ROOT path.
+
+=item I<perlbrew_perl_version :String:Required>
+
+version of perl.
+
+e.g.
+
+  perl-5.16.2
+
+=back
+
 =item C<perlbrew:lib:create>
+
+=over 2
+
+=item I<perlbrew_root :String:Required>
+
+PERLBREW_ROOT path.
+
+=item I<perlbrew :String:Required>
+
+lib-name for "perlbrew lib"
+
+e.g.
+
+  perl-5.16.2@nobita, shizuka
+
+=back
 
 =item C<perlbrew:lib:delete>
 
+=over 2
+
+=item I<perlbrew_root :String:Required>
+
+PERLBREW_ROOT path.
+
+=item I<perlbrew :String:Required>
+
+lib-name for "perlbrew lib"
+
+e.g.
+
+  perl-5.16.2@nobita, shizuka
+
+=back
+
 =item C<perlbrew:cpanm>
+
+=over 2
+
+=item I<perlbrew_root :String:Required>
+
+PERLBREW_ROOT path.
+
+=item I<perlbrew :String:Required>
+
+version or lib-name for "perlbrew"
+
+e.g.
+
+  perl-5.16.2, perl-5.16.2@nobita, shizuka
+
+=item I<cpanm_modules :ArrayRef>
+
+install modules.
+
+=item I<cpanm_options :ArrayRef>
+
+options for "cpanm".
+
+=back
 
 =back
 
