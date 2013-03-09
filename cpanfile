@@ -8,7 +8,7 @@ requires "File::Spec::Functions";
     requires 'Test::Exception::LessClever' => '0.006';
 # };
 
-# on 'development' => sub {
+# on 'develop' => sub {
     requires 'Test::Perl::Critic';
     requires 'Test::Pod';
     requires 'Test::Pod::Coverage';
