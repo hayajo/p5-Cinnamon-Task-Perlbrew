@@ -177,11 +177,6 @@ EOS
         my $cpanm_opts      = get('cpanm_options') || [];
         my $perlbrew_sudo   = get('perlbrew_sudo') || 0;
 
-        my $perlbrew_bin = shell_quote( _perlbrew_bin $perlbrew_root );
-        my $perlbrew_rc  = shell_quote( _perlbrew_rc $perlbrew_root );
-        $perlbrew_root   = shell_quote($perlbrew_root);
-        $perlbrew        = shell_quote($perlbrew);
-
         my $cmd_str = "cpanm";
         for ( @$cpanm_opts, @$modules ) {
             $cmd_str .= ' ' . shell_quote($_);
