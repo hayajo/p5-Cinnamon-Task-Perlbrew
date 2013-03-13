@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 7;
+use Test::More tests => 8;
 use Test::Exception::LessClever;
 
 use Cinnamon::DSL;
@@ -90,6 +90,24 @@ subtest 'perlbrew:perl:uninstall' => sub {
     is $stdout, <<"CMD"
 export PERLBREW_ROOT=$perlbrew_root && \\
 $perlbrew_bin uninstall $perlbrew
+CMD
+};
+
+subtest 'perlbrew:perl:upgrade' => sub {
+    set perlbrew_root => $perlbrew_root;
+    set perlbrew      => $perlbrew;
+
+    my $task = Cinnamon::Config::get_task('perlbrew:perl:upgrade');
+    my ($stdout) = $task->($host);
+
+    my $perlbrew_bin = catfile($perlbrew_root, qw/bin perlbrew/);
+    my $perlbrew_rc = catfile($perlbrew_root, qw/etc bashrc/);
+    my $upgrade_perl = "perlbrew upgrade-perl\n";
+    is $stdout, join(' ', <<"CMD", $upgrade_perl);
+export PERLBREW_ROOT=$perlbrew_root && \\
+export PERLBREW_HOME=$perlbrew_root && \\
+source $perlbrew_rc && \\
+perlbrew use $perlbrew && \\
 CMD
 };
 

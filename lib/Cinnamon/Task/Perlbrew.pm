@@ -130,6 +130,20 @@ $perlbrew_bin uninstall $version
 EOS
             } $host;
         },
+        upgrade => sub {
+            my ( $host, @args ) = @_;
+            my $perlbrew_root   = get('perlbrew_root') or Carp::croak "perlbrew_root is required";
+            my $perlbrew        = get('perlbrew') or Carp::croak "perlbrew is required";
+            my $perlbrew_sudo   = get('perlbrew_sudo') || 0;
+
+            my $cmd_str = "perlbrew upgrade-perl\n";
+
+            remote {
+                perlbrew_run {
+                    _run( $cmd_str, $perlbrew_sudo );
+                } $perlbrew_root, $perlbrew;
+            } $host;
+        },
     },
     lib => {
         create => sub {
