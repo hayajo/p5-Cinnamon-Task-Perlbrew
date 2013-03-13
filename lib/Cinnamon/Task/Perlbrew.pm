@@ -44,10 +44,10 @@ sub perlbrew_run (&$$) {
         my @cmd = @_;
 
         my $cmd_str = <<"EOS";
-export PERLBREW_ROOT=$perlbrew_root; \\
-export PERLBREW_HOME=$perlbrew_root; \\
-source $perlbrew_rc; \\
-perlbrew use $perlbrew; \\
+export PERLBREW_ROOT=$perlbrew_root && \\
+export PERLBREW_HOME=$perlbrew_root && \\
+source $perlbrew_rc && \\
+perlbrew use $perlbrew && \\
 EOS
 
         if ( ref $cmd[0] eq 'HASH' ) {
@@ -74,14 +74,14 @@ task perlbrew => {
 
         remote {
             _run( <<"EOS", $perlbrew_sudo );
-export PERLBREW_ROOT=$perlbrew_root; \\
+export PERLBREW_ROOT=$perlbrew_root && \\
 if [ ! -e $perlbrew_bin ]; then \\
-  curl -kL http://install.perlbrew.pl > perlbrew-install; \\
-  /bin/sh perlbrew-install; \\
+  curl -kL http://install.perlbrew.pl > perlbrew-install && \\
+  /bin/sh perlbrew-install && \\
   $perlbrew_bin -f install-cpanm; \\
 else \\
-  $perlbrew_bin self-upgrade; \\
-  $perlbrew_bin -f install-patchperl; \\
+  $perlbrew_bin self-upgrade && \\
+  $perlbrew_bin -f install-patchperl && \\
   $perlbrew_bin -f install-cpanm; \\
 fi
 EOS
@@ -100,7 +100,7 @@ EOS
             $version         = shell_quote($version);
 
             my $cmd_str = <<"EOS";
-export PERLBREW_ROOT=$perlbrew_root; \\
+export PERLBREW_ROOT=$perlbrew_root && \\
 $perlbrew_bin install --verbose
 EOS
             chomp $cmd_str;
@@ -125,7 +125,7 @@ EOS
 
             remote {
                 _run( <<"EOS", $perlbrew_sudo );
-export PERLBREW_ROOT=$perlbrew_root; \\
+export PERLBREW_ROOT=$perlbrew_root && \\
 $perlbrew_bin uninstall $version
 EOS
             } $host;
@@ -144,8 +144,8 @@ EOS
 
             remote {
                 _run( <<"EOS", $perlbrew_sudo );
-export PERLBREW_ROOT=$perlbrew_root; \\
-export PERLBREW_HOME=$perlbrew_root; \\
+export PERLBREW_ROOT=$perlbrew_root && \\
+export PERLBREW_HOME=$perlbrew_root && \\
 $perlbrew_bin lib create $perlbrew
 EOS
             } $host;
@@ -162,8 +162,8 @@ EOS
 
             remote {
                 _run( <<"EOS", $perlbrew_sudo );
-export PERLBREW_ROOT=$perlbrew_root; \\
-export PERLBREW_HOME=$perlbrew_root; \\
+export PERLBREW_ROOT=$perlbrew_root && \\
+export PERLBREW_HOME=$perlbrew_root && \\
 $perlbrew_bin lib delete $perlbrew
 EOS
             } $host;

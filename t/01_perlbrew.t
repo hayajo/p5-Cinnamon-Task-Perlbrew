@@ -34,10 +34,10 @@ subtest 'perlbrew_run' => sub {
 
         my $perlbrew_rc = catfile($perlbrew_root, qw/etc bashrc/);
         is $stdout, join( ' ', <<"CMD", @run_cmd );
-export PERLBREW_ROOT=$perlbrew_root; \\
-export PERLBREW_HOME=$perlbrew_root; \\
-source $perlbrew_rc; \\
-perlbrew use $perlbrew; \\
+export PERLBREW_ROOT=$perlbrew_root && \\
+export PERLBREW_HOME=$perlbrew_root && \\
+source $perlbrew_rc && \\
+perlbrew use $perlbrew && \\
 CMD
     } $host;
 };
@@ -51,14 +51,14 @@ subtest 'perlbrew:setup' => sub {
 
     my $perlbrew_bin = catfile($perlbrew_root, qw/bin perlbrew/);
     is $stdout, <<"CMD";
-export PERLBREW_ROOT=$perlbrew_root; \\
+export PERLBREW_ROOT=$perlbrew_root && \\
 if [ ! -e $perlbrew_bin ]; then \\
-  curl -kL http://install.perlbrew.pl > perlbrew-install; \\
-  /bin/sh perlbrew-install; \\
+  curl -kL http://install.perlbrew.pl > perlbrew-install && \\
+  /bin/sh perlbrew-install && \\
   $perlbrew_bin -f install-cpanm; \\
 else \\
-  $perlbrew_bin self-upgrade; \\
-  $perlbrew_bin -f install-patchperl; \\
+  $perlbrew_bin self-upgrade && \\
+  $perlbrew_bin -f install-patchperl && \\
   $perlbrew_bin -f install-cpanm; \\
 fi
 CMD
@@ -74,7 +74,7 @@ subtest 'perlbrew:perl:install' => sub {
 
     my $perlbrew_bin = catfile($perlbrew_root, qw/bin perlbrew/);
     is $stdout, <<"CMD"
-export PERLBREW_ROOT=$perlbrew_root; \\
+export PERLBREW_ROOT=$perlbrew_root && \\
 $perlbrew_bin install --verbose --force -j 5 $perlbrew
 CMD
 };
@@ -88,7 +88,7 @@ subtest 'perlbrew:perl:uninstall' => sub {
 
     my $perlbrew_bin = catfile($perlbrew_root, qw/bin perlbrew/);
     is $stdout, <<"CMD"
-export PERLBREW_ROOT=$perlbrew_root; \\
+export PERLBREW_ROOT=$perlbrew_root && \\
 $perlbrew_bin uninstall $perlbrew
 CMD
 };
@@ -102,8 +102,8 @@ subtest 'perlbrew:lib:create' => sub {
 
     my $perlbrew_bin = catfile($perlbrew_root, qw/bin perlbrew/);
     is $stdout, <<"CMD";
-export PERLBREW_ROOT=$perlbrew_root; \\
-export PERLBREW_HOME=$perlbrew_root; \\
+export PERLBREW_ROOT=$perlbrew_root && \\
+export PERLBREW_HOME=$perlbrew_root && \\
 $perlbrew_bin lib create $perlbrew
 CMD
 };
@@ -117,8 +117,8 @@ subtest 'perlbrew:lib:delete' => sub {
 
     my $perlbrew_bin = catfile($perlbrew_root, qw/bin perlbrew/);
     is $stdout, <<"CMD";
-export PERLBREW_ROOT=$perlbrew_root; \\
-export PERLBREW_HOME=$perlbrew_root; \\
+export PERLBREW_ROOT=$perlbrew_root && \\
+export PERLBREW_HOME=$perlbrew_root && \\
 $perlbrew_bin lib delete $perlbrew
 CMD
 };
@@ -136,9 +136,9 @@ subtest 'perlbrew:lib:cpanm' => sub {
     my $perlbrew_bin = catfile($perlbrew_root, qw/bin perlbrew/);
     my $perlbrew_rc = catfile($perlbrew_root, qw/etc bashrc/);
     is $stdout, join( ' ', <<"CMD", $cpanm );
-export PERLBREW_ROOT=$perlbrew_root; \\
-export PERLBREW_HOME=$perlbrew_root; \\
-source $perlbrew_rc; \\
-perlbrew use $perlbrew; \\
+export PERLBREW_ROOT=$perlbrew_root && \\
+export PERLBREW_HOME=$perlbrew_root && \\
+source $perlbrew_rc && \\
+perlbrew use $perlbrew && \\
 CMD
 };
