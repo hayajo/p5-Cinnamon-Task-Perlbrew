@@ -15,6 +15,16 @@ my $perlbrew_root = getcwd;
 my $perlbrew      = "perl-5.16.2";
 
 {
+    package TESTIN;
+    sub TIEHANDLE {
+        my $class = shift;
+        my @in_lines = map { "$_\n" } @_;
+        bless \@in_lines, $class;
+    }
+    sub READLINE { shift @{ $_[0] } }
+}
+
+{
     no strict 'refs';
     no warnings 'redefine';
     *Cinnamon::Remote::execute = sub {
@@ -30,15 +40,22 @@ subtest 'perlbrew_run' => sub {
     dies_ok { perlberw_run { run @run_cmd } $perlbrew_root, $perlbrew } "die on local";
 
     remote {
-        my ($stdout) = perlbrew_run { run @run_cmd } $perlbrew_root, $perlbrew;
+        my $pass = "mypassword";
+        tie local *STDIN, 'TESTIN', $pass;
+
+        my ($stdout_run) = perlbrew_run { run @run_cmd } $perlbrew_root, $perlbrew;
+        my ($stdout_sudo) = perlbrew_run { sudo @run_cmd } $perlbrew_root, $perlbrew;
+        my @stdout = ($stdout_run, $stdout_sudo);
 
         my $perlbrew_rc = catfile($perlbrew_root, qw/etc bashrc/);
-        is $stdout, join( ' ', <<"CMD", @run_cmd );
+        for (@stdout) {
+            is $_, join( ' ', <<"CMD", @run_cmd );
 export PERLBREW_ROOT=$perlbrew_root && \\
 export PERLBREW_HOME=$perlbrew_root && \\
 source $perlbrew_rc && \\
 perlbrew use $perlbrew && \\
 CMD
+        }
     } $host;
 };
 

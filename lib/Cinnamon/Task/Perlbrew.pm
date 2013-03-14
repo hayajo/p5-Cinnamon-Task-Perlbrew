@@ -34,9 +34,9 @@ sub perlbrew_run (&$$) {
     no warnings 'redefine';
 
     my $caller   = caller;
+
     my $run      = "${caller}::run";
     my $orig_run = *{$run}{CODE} or Carp::croak "$run is not implemented";
-
     local *{$run} = sub (@) {
         Carp::croak "perlbrew_run have to use with remote"
             unless ( ref $_ eq 'Cinnamon::Remote' );
@@ -58,6 +58,13 @@ EOS
         }
 
         $orig_run->(@cmd);
+    };
+
+    my $sudo     = "${caller}::sudo";
+    my $orig_sudo = *{$sudo}{CODE} or Carp::croak "$sudo is not implemented";
+    local *{$sudo} = sub (@) {
+        local *{'Cinnamon::DSL::run' } = *{$run};
+        $orig_sudo->(@_);
     };
 
     $code->();
