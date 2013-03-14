@@ -12,7 +12,7 @@ use File::Spec::Functions;
 
 my $host          = 'localhost';
 my $perlbrew_root = getcwd;
-my $perlbrew      = "perl-5.16.2";
+my $perlbrew_name = "perl-5.16.2";
 
 {
     package TESTIN;
@@ -37,14 +37,14 @@ my $perlbrew      = "perl-5.16.2";
 subtest 'perlbrew_run' => sub {
     my @run_cmd = qw/perl --version/;
 
-    dies_ok { perlberw_run { run @run_cmd } $perlbrew_root, $perlbrew } "die on local";
+    dies_ok { perlberw_run { run @run_cmd } $perlbrew_root, $perlbrew_name } "die on local";
 
     remote {
         my $pass = "mypassword";
         tie local *STDIN, 'TESTIN', $pass;
 
-        my ($stdout_run) = perlbrew_run { run @run_cmd } $perlbrew_root, $perlbrew;
-        my ($stdout_sudo) = perlbrew_run { sudo @run_cmd } $perlbrew_root, $perlbrew;
+        my ($stdout_run) = perlbrew_run { run @run_cmd } $perlbrew_root, $perlbrew_name;
+        my ($stdout_sudo) = perlbrew_run { sudo @run_cmd } $perlbrew_root, $perlbrew_name;
         my @stdout = ($stdout_run, $stdout_sudo);
 
         my $perlbrew_rc = catfile($perlbrew_root, qw/etc bashrc/);
@@ -53,7 +53,7 @@ subtest 'perlbrew_run' => sub {
 export PERLBREW_ROOT=$perlbrew_root && \\
 export PERLBREW_HOME=$perlbrew_root && \\
 source $perlbrew_rc && \\
-perlbrew use $perlbrew && \\
+perlbrew use $perlbrew_name && \\
 CMD
         }
     } $host;
@@ -83,7 +83,7 @@ CMD
 
 subtest 'perlbrew:perl:install' => sub {
     set perlbrew_root                 => $perlbrew_root;
-    set perlbrew_perl_version         => $perlbrew;
+    set perlbrew_perl_version         => $perlbrew_name;
     set perlbrew_perl_install_options => [qw/--force -j 5/];
 
     my $task = Cinnamon::Config::get_task('perlbrew:perl:install');
@@ -92,13 +92,13 @@ subtest 'perlbrew:perl:install' => sub {
     my $perlbrew_bin = catfile($perlbrew_root, qw/bin perlbrew/);
     is $stdout, <<"CMD"
 export PERLBREW_ROOT=$perlbrew_root && \\
-$perlbrew_bin install --verbose --force -j 5 $perlbrew
+$perlbrew_bin install --verbose --force -j 5 $perlbrew_name
 CMD
 };
 
 subtest 'perlbrew:perl:uninstall' => sub {
     set perlbrew_root         => $perlbrew_root;
-    set perlbrew_perl_version => $perlbrew;
+    set perlbrew_perl_version => $perlbrew_name;
 
     my $task = Cinnamon::Config::get_task('perlbrew:perl:uninstall');
     my ($stdout) = $task->($host);
@@ -106,13 +106,13 @@ subtest 'perlbrew:perl:uninstall' => sub {
     my $perlbrew_bin = catfile($perlbrew_root, qw/bin perlbrew/);
     is $stdout, <<"CMD"
 export PERLBREW_ROOT=$perlbrew_root && \\
-$perlbrew_bin uninstall $perlbrew
+$perlbrew_bin uninstall $perlbrew_name
 CMD
 };
 
 subtest 'perlbrew:perl:upgrade' => sub {
     set perlbrew_root => $perlbrew_root;
-    set perlbrew      => $perlbrew;
+    set perlbrew_name => $perlbrew_name;
 
     my $task = Cinnamon::Config::get_task('perlbrew:perl:upgrade');
     my ($stdout) = $task->($host);
@@ -124,13 +124,13 @@ subtest 'perlbrew:perl:upgrade' => sub {
 export PERLBREW_ROOT=$perlbrew_root && \\
 export PERLBREW_HOME=$perlbrew_root && \\
 source $perlbrew_rc && \\
-perlbrew use $perlbrew && \\
+perlbrew use $perlbrew_name && \\
 CMD
 };
 
 subtest 'perlbrew:lib:create' => sub {
-    set perlbrew_root => $perlbrew_root;
-    set perlbrew      => $perlbrew;
+    set perlbrew_root     => $perlbrew_root;
+    set perlbrew_lib_name => $perlbrew_name;
 
     my $task = Cinnamon::Config::get_task('perlbrew:lib:create');
     my ($stdout) = $task->($host);
@@ -139,13 +139,13 @@ subtest 'perlbrew:lib:create' => sub {
     is $stdout, <<"CMD";
 export PERLBREW_ROOT=$perlbrew_root && \\
 export PERLBREW_HOME=$perlbrew_root && \\
-$perlbrew_bin lib create $perlbrew
+$perlbrew_bin lib create $perlbrew_name
 CMD
 };
 
 subtest 'perlbrew:lib:delete' => sub {
-    set perlbrew_root => $perlbrew_root;
-    set perlbrew      => $perlbrew;
+    set perlbrew_root     => $perlbrew_root;
+    set perlbrew_lib_name => $perlbrew_name;
 
     my $task = Cinnamon::Config::get_task('perlbrew:lib:delete');
     my ($stdout) = $task->($host);
@@ -154,13 +154,13 @@ subtest 'perlbrew:lib:delete' => sub {
     is $stdout, <<"CMD";
 export PERLBREW_ROOT=$perlbrew_root && \\
 export PERLBREW_HOME=$perlbrew_root && \\
-$perlbrew_bin lib delete $perlbrew
+$perlbrew_bin lib delete $perlbrew_name
 CMD
 };
 
 subtest 'perlbrew:lib:cpanm' => sub {
     set perlbrew_root => $perlbrew_root;
-    set perlbrew      => $perlbrew;
+    set perlbrew_name => $perlbrew_name;
     set cpanm_modules => [qw/Carton Plack/];
     set cpanm_options => [qw/-L extlib --verbose --no-interactive/];
 
@@ -174,6 +174,6 @@ subtest 'perlbrew:lib:cpanm' => sub {
 export PERLBREW_ROOT=$perlbrew_root && \\
 export PERLBREW_HOME=$perlbrew_root && \\
 source $perlbrew_rc && \\
-perlbrew use $perlbrew && \\
+perlbrew use $perlbrew_name && \\
 CMD
 };

@@ -23,7 +23,7 @@ sub _perlbrew_perl_dir { catdir( $_[0], 'perls', $_[1] ) }
 sub perlbrew_run (&$$) {
     my $code          = shift;
     my $perlbrew_root = shift;
-    my $perlbrew      = shell_quote shift;
+    my $perlbrew_name = shell_quote shift;
 
     my $perlbrew_bin = shell_quote( _perlbrew_bin $perlbrew_root );
     my $perlbrew_rc  = shell_quote( _perlbrew_rc $perlbrew_root );
@@ -47,7 +47,7 @@ sub perlbrew_run (&$$) {
 export PERLBREW_ROOT=$perlbrew_root && \\
 export PERLBREW_HOME=$perlbrew_root && \\
 source $perlbrew_rc && \\
-perlbrew use $perlbrew && \\
+perlbrew use $perlbrew_name && \\
 EOS
 
         if ( ref $cmd[0] eq 'HASH' ) {
@@ -140,7 +140,7 @@ EOS
         upgrade => sub {
             my ( $host, @args ) = @_;
             my $perlbrew_root   = get('perlbrew_root') or Carp::croak "perlbrew_root is required";
-            my $perlbrew        = get('perlbrew') or Carp::croak "perlbrew is required";
+            my $perlbrew_name   = get('perlbrew_name') or Carp::croak "perlbrew_name is required";
             my $perlbrew_sudo   = get('perlbrew_sudo') || 0;
 
             my $cmd_str = "perlbrew upgrade-perl\n";
@@ -148,44 +148,44 @@ EOS
             remote {
                 perlbrew_run {
                     _run( $cmd_str, $perlbrew_sudo );
-                } $perlbrew_root, $perlbrew;
+                } $perlbrew_root, $perlbrew_name;
             } $host;
         },
     },
     lib => {
         create => sub {
             my ( $host, @args ) = @_;
-            my $perlbrew_root = get('perlbrew_root') or Carp::croak "perlbrew_root is required";
-            my $perlbrew      = get('perlbrew') or Carp::croak "perlbrew is required";
-            my $perlbrew_sudo = get('perlbrew_sudo') || 0;
+            my $perlbrew_root     = get('perlbrew_root') or Carp::croak "perlbrew_root is required";
+            my $perlbrew_lib_name = get('perlbrew_lib_name') or Carp::croak "perlbrew_lib_name is required";
+            my $perlbrew_sudo     = get('perlbrew_sudo') || 0;
 
-            my $perlbrew_bin = shell_quote( _perlbrew_bin $perlbrew_root );
-            $perlbrew_root   = shell_quote($perlbrew_root);
-            $perlbrew        = shell_quote($perlbrew);
+            my $perlbrew_bin   = shell_quote( _perlbrew_bin $perlbrew_root );
+            $perlbrew_root     = shell_quote($perlbrew_root);
+            $perlbrew_lib_name = shell_quote($perlbrew_lib_name);
 
             remote {
                 _run( <<"EOS", $perlbrew_sudo );
 export PERLBREW_ROOT=$perlbrew_root && \\
 export PERLBREW_HOME=$perlbrew_root && \\
-$perlbrew_bin lib create $perlbrew
+$perlbrew_bin lib create $perlbrew_lib_name
 EOS
             } $host;
         },
         delete => sub {
             my ( $host, @args ) = @_;
-            my $perlbrew_root = get('perlbrew_root') or Carp::croak "perlbrew_root is required";
-            my $perlbrew      = get('perlbrew') or Carp::croak "perlbrew is required";
-            my $perlbrew_sudo = get('perlbrew_sudo') || 0;
+            my $perlbrew_root     = get('perlbrew_root') or Carp::croak "perlbrew_root is required";
+            my $perlbrew_lib_name = get('perlbrew_lib_name') or Carp::croak "perlbrew_lib_name is required";
+            my $perlbrew_sudo     = get('perlbrew_sudo') || 0;
 
-            my $perlbrew_bin = shell_quote( _perlbrew_bin $perlbrew_root );
-            $perlbrew_root   = shell_quote($perlbrew_root);
-            $perlbrew        = shell_quote($perlbrew);
+            my $perlbrew_bin   = shell_quote( _perlbrew_bin $perlbrew_root );
+            $perlbrew_root     = shell_quote($perlbrew_root);
+            $perlbrew_lib_name = shell_quote($perlbrew_lib_name);
 
             remote {
                 _run( <<"EOS", $perlbrew_sudo );
 export PERLBREW_ROOT=$perlbrew_root && \\
 export PERLBREW_HOME=$perlbrew_root && \\
-$perlbrew_bin lib delete $perlbrew
+$perlbrew_bin lib delete $perlbrew_lib_name
 EOS
             } $host;
         },
@@ -193,7 +193,7 @@ EOS
     cpanm => sub {
         my ( $host, @args ) = @_;
         my $perlbrew_root   = get('perlbrew_root') or Carp::croak "perlbrew_root is required";
-        my $perlbrew        = get('perlbrew') or Carp::croak "perlbrew is required";
+        my $perlbrew_name   = get('perlbrew_name') or Carp::croak "perlbrew_name is required";
         my $modules         = get('cpanm_modules') || [];
         my $cpanm_opts      = get('cpanm_options') || [];
         my $perlbrew_sudo   = get('perlbrew_sudo') || 0;
@@ -207,7 +207,7 @@ EOS
         remote {
             perlbrew_run {
                 _run( $cmd_str, $perlbrew_sudo );
-            } $perlbrew_root, $perlbrew;
+            } $perlbrew_root, $perlbrew_name;
         } $host;
     },
 };
@@ -252,11 +252,11 @@ This document describes Cinnamon::Task::Perlbrew version 0.01
       version => sub {
           my ( $host, @args ) = @_;
           my $perlbrew_root   = get('perlbrew_root');
-          my $perlbrew        = get('perlbrew');
+          my $perlbrew_name   = get('perlbrew_name');
           remote {
               perlbrew_run {
                 run 'perl', '--version';
-              } $perlbrew_root, $perlbrew;
+              } $perlbrew_root, $perlbrew_name;
           } $host;
       },
   };
@@ -280,7 +280,7 @@ This is B<alpha> version.
 
 =over 2
 
-=item I<perlbrew_root :Srting:Required>
+=item I<perlbrew_root :String:Required>
 
 PERLBREW_ROOT path.
 
@@ -326,6 +326,24 @@ e.g.
 
 =back
 
+=item C<perlbrew:perl:upgrade>
+
+=over 2
+
+=item I<perlbrew_root :String:Required>
+
+PERLBREW_ROOT path.
+
+=item I<perlbrew_name :String:Required>
+
+version, alias or lib-name for "perlbrew"
+
+e.g.
+
+  perl-5.16.2, 5.16, perl-5.16.2@nobita
+
+=back
+
 =item C<perlbrew:lib:create>
 
 =over 2
@@ -334,7 +352,7 @@ e.g.
 
 PERLBREW_ROOT path.
 
-=item I<perlbrew :String:Required>
+=item I<perlbrew_lib_name :String:Required>
 
 lib-name for "perlbrew lib"
 
@@ -352,7 +370,7 @@ e.g.
 
 PERLBREW_ROOT path.
 
-=item I<perlbrew :String:Required>
+=item I<perlbrew_lib_name :String:Required>
 
 lib-name for "perlbrew lib"
 
@@ -370,13 +388,13 @@ e.g.
 
 PERLBREW_ROOT path.
 
-=item I<perlbrew :String:Required>
+=item I<perlbrew_name :String:Required>
 
-version or lib-name for "perlbrew"
+version, alias or lib-name for "perlbrew"
 
 e.g.
 
-  perl-5.16.2, perl-5.16.2@nobita, shizuka
+  perl-5.16.2, 5.16, perl-5.16.2@nobita
 
 =item I<cpanm_modules :ArrayRef>
 
